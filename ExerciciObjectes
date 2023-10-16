@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Formulari d'informació</title>
+</head>
+<body>
+    <button id="btnDemanaInfo">Demana Informació</button>
+    <div id="infoContainer"></div>
+
+    <script>
+        class Usuari {
+            constructor() {
+                this.nom = '';
+                this.cognom = '';
+                this.edat = '';
+            }
+
+            mostrarInfo() {
+                const infoDiv = document.getElementById('infoContainer');
+                infoDiv.innerHTML = `Nom: ${this.nom}<br>Cognom: ${this.cognom}<br>Edat: ${this.edat}`;
+            }
+        }
+        const usuari = new Usuari();
+
+        document.getElementById('btnDemanaInfo').addEventListener('click', () => {
+            usuari.nom = prompt('Introdueix el teu nom:');
+            usuari.cognom = prompt('Introdueix el teu cognom:');
+            usuari.edat = prompt('Introdueix la teva edat:');
+        });
+
+        document.getElementById('btnMostraInfo').addEventListener('click', () => {
+            usuari.mostrarInfo();
+        });
+    </script>
+</body>
+</html>
