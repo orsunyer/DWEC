@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Estilos CSS para las tarjetas y cualquier estilo adicional */
+        h1 {
+            text-align: center;
+            color: #0053d5;
+            font-family: sans-serif;
+        }
+        .tarjeta {
+            border: 1px solid #ccc;
+            margin: 10px;
+            padding: 10px;
+            display: inline-block;
+            cursor: pointer;
+        }
+ 
+        .seleccionada {
+            box-shadow: 0 0 7px #0ccd0c;
+        }
+
+        div#Elegir {
+            text-align: center;
+            font-family: sans-serif;
+            font-size: 17px;
+        }
+        div#contenedor-tarjetas {
+            text-align: center;
+            margin-top: 50px;
+        }
+        button {
+            background-color: burlywood;
+            border-width: 1px;
+        }
+    </style>
+    <title>Juego de cartas</title>
+</head>
+<body>
+    <h1 style="margin-bottom: 50px;">Hola PokeAPI</h1>
+    <div id="Elegir">
+    <label for="numTarjetas">Elige cuántos Pokémon quieres:</label>
+    <input type="number" id="numTarjetas" min="1" max="10" value="5">
+    <button onclick="obtenerYMostrarTarjetas()">Mostrar Tarjetas</button>
+</div>
+    <div id="contenedor-tarjetas"></div>
+    <script>
+        function obtenerYMostrarTarjetas() {
+            const numTarjetas = document.getElementById("numTarjetas").value;
+            if (numTarjetas < 1 || numTarjetas > 10) {
+                alert("Ingrese un número válido entre 1 y 10.");
+                return;
+            }
+ 
+            const contenedorTarjetas = document.getElementById("contenedor-tarjetas");
+            contenedorTarjetas.innerHTML = ""; // Limpiar contenedor anterior
+ 
+            let tarjetasSeleccionadas = [];
+ 
+            function obtenerDatosPokemon() {
+                const promesas = [];
+ 
+                for (let i = 0; i < numTarjetas; i++) {
+                    const idPokemonAleatorio = Math.floor(Math.random() * 898) + 1;
+                    const url = `https://pokeapi.co/api/v2/pokemon/${idPokemonAleatorio}`;
+                    promesas.push(fetch(url).then(respuesta => respuesta.json()));
+                }
+ 
+                Promise.all(promesas)
+                    .then(datosPokemonArray => {
+                        datosPokemonArray.forEach(datosPokemon => {
+                            crearTarjeta(datosPokemon);
+                        });
+                    })
+                    .catch(error => console.error("Error al obtener datos de Pokémon:", error));
+            }
+ 
+            function crearTarjeta(datosPokemon) {
+                const tarjeta = document.createElement("div");
+                tarjeta.classList.add("tarjeta");
+ 
+                // Añade información del Pokémon a la tarjeta
+                // Puedes personalizar esto según tus necesidades
+                tarjeta.innerHTML = `
+                    <img src="${datosPokemon.sprites.front_default}" alt="${datosPokemon.name}">
+                    <p>Nombre: ${datosPokemon.name}</p>
+                    <p>Tipo: ${datosPokemon.types[0].type.name}</p>
+                    <p>Ataque: ${datosPokemon.stats[1].base_stat}</p>
+                    <p>Defensa: ${datosPokemon.stats[2].base_stat}</p>
+                `;
+ 
+                tarjeta.addEventListener("click", () => alternarSeleccionTarjeta(tarjeta));
+ 
+                contenedorTarjetas.appendChild(tarjeta);
+            }
+ 
+            function alternarSeleccionTarjeta(tarjeta) {
+                tarjeta.classList.toggle("seleccionada");
+ 
+                if (tarjeta.classList.contains("seleccionada")) {
+                    tarjetasSeleccionadas.push(tarjeta);
+                } else {
+                    tarjetasSeleccionadas = tarjetasSeleccionadas.filter(tarjetaSeleccionada => tarjetaSeleccionada !== tarjeta);
+                }
+ 
+                if (tarjetasSeleccionadas.length === 2) {
+                    setTimeout(() => {
+                        realizarBatalla(tarjetasSeleccionadas);
+                        tarjetasSeleccionadas.forEach(tarjetaSeleccionada => tarjetaSeleccionada.classList.remove("seleccionada"));
+                        tarjetasSeleccionadas = [];
+                    }, 1000);
+                }
+            }
+ 
+            function realizarBatalla(tarjetas) {
+                const ataqueAtacante = parseInt(tarjetas[0].querySelector("p:nth-child(4)").textContent.split(":")[1]);
+                const defensaDefensor = parseInt(tarjetas[1].querySelector("p:nth-child(5)").textContent.split(":")[1]);
+ 
+                if (ataqueAtacante > defensaDefensor) {
+                    alert(`${tarjetas[0].querySelector("p:nth-child(2)").textContent.split(":")[1]} gana`);
+                } else if (ataqueAtacante < defensaDefensor) {
+                    alert(`${tarjetas[1].querySelector("p:nth-child(2)").textContent.split(":")[1]} gana`);
+                } else {
+                    alert("¡Es un empate!");
+                }
+            }
+ 
+            obtenerDatosPokemon();
+        }
+    </script>
+</body>
+</html>
